@@ -100,9 +100,9 @@ function freestyle_moves() {
 		'publicly_queryable'    => true,
 		'capability_type'       => 'page',
 		'show_in_rest'          => true,
+		'rest_base'             => 'moves',
+  		'rest_controller_class' => 'WP_REST_Posts_Controller',
 		'rewrite'               => $rewrite,
-		'rest_base'             => 'moves-api',
-		'rest_controller_class' => 'WP_REST_Posts_Controller',
 	);
 	register_post_type( 'moves', $args );
 
