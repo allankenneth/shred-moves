@@ -5,9 +5,9 @@
 	<div class="col-md-12">
 		<ol class="breadcrumb">
 		
-		<li><a href="/">Reference Home</a></li>
-		<li><a href="/freestyle">Freestyle</a></li>
-		<li><a href="/freestyles/moves">Moves List</a></li>
+		<li><a href="/reference">Reference Home</a></li>
+		<li><a href="/reference/freestyle">Freestyle</a></li>
+		<li><a href="/reference/freestyle/moves">Moves List</a></li>
 		</ol>
 
 

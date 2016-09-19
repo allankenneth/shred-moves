@@ -3,7 +3,12 @@
 <div class="container">
 <div class="row">
 	<div class="col-md-12">
-		<a href="/freestyle">Footbag Freestyle</a>
+		<ol class="breadcrumb">
+		<li><a href="/reference">Reference Home</a></li>
+		<li><a href="/reference/freestyle">Freestyle</a></li>
+		<li><a href="/reference/freestyle/moves">Moves List</a></li>
+		</ol>
+
 		<h1>Moves List</h1>
 	</div>
 	<div class="col-md-3">

@@ -190,3 +190,169 @@ add_action( 'init', 'adds', 0 );
 
 
 
+class Move_Info_Meta_Box {
+
+	public function __construct() {
+
+		if ( is_admin() ) {
+			add_action( 'load-post.php',     array( $this, 'init_metabox' ) );
+			add_action( 'load-post-new.php', array( $this, 'init_metabox' ) );
+		}
+
+	}
+
+	public function init_metabox() {
+
+		add_action( 'add_meta_boxes', array( $this, 'add_metabox'  )        );
+		add_action( 'save_post',      array( $this, 'save_metabox' ), 10, 2 );
+
+	}
+
+	public function add_metabox() {
+
+		add_meta_box(
+			'move_info',
+			__( 'Move Info', 'text_domain' ),
+			array( $this, 'render_metabox' ),
+			'Move',
+			'advanced',
+			'default'
+		);
+
+	}
+
+	public function render_metabox( $post ) {
+
+		// Add nonce for security and authentication.
+		wp_nonce_field( 'move_nonce_action', 'move_nonce' );
+
+		// Retrieve an existing value from the database.
+		$move_addbreakdown = get_post_meta( $post->ID, 'AddBreakDown', true );
+		$move_consecrecord = get_post_meta( $post->ID, 'Consecutive Record', true );
+		$move_inventor = get_post_meta( $post->ID, 'Inventor', true );
+		$move_jobs = get_post_meta( $post->ID, 'JobsNotation', true );
+		$move_relatedto = get_post_meta( $post->ID, 'RelatedTo', true );
+		$move_supplementalvid = get_post_meta( $post->ID, 'SupplementalVideos', true );
+		$move_video = get_post_meta( $post->ID, 'Video', true );
+
+		// Set default values.
+		if( empty( $move_addbreakdown ) ) $move_addbreakdown = '';
+		if( empty( $move_consecrecord ) ) $move_consecrecord = '';
+		if( empty( $move_inventor ) ) $move_inventor = '';
+		if( empty( $move_jobs ) ) $move_jobs = '';
+		if( empty( $move_relatedto ) ) $move_relatedto = '';
+		if( empty( $move_supplementalvid ) ) $move_supplementalvid = '';
+		if( empty( $move_video ) ) $move_video = '';
+		// Form fields.
+		echo '<table class="form-table">';
+
+		echo '	<tr>';
+		echo '		<th><label for="move_addbreakdown" class="move_addbreakdown_label">' . __( 'ADD Breakdown', 'text_domain' ) . '</label></th>';
+		echo '		<td>';
+		echo '			<input type="text" id="move_addbreakdown" name="move_addbreakdown" class="move_addbreakdown_field" placeholder="' . esc_attr__( '', 'text_domain' ) . '" value="' . esc_attr__( $move_addbreakdown ) . '">';
+		echo '		</td>';
+		echo '	</tr>';
+
+		echo '	<tr>';
+		echo '		<th><label for="move_consecrecord" class="move_consecrecord_label">' . __( 'Consecutive Record', 'text_domain' ) . '</label></th>';
+		echo '		<td>';
+		echo '			<input type="text" id="move_consecrecord" name="move_consecrecord" class="move_consecrecord_field" placeholder="' . esc_attr__( '', 'text_domain' ) . '" value="' . esc_attr__( $move_consecrecord ) . '">';
+		echo '		</td>';
+		echo '	</tr>';
+
+		echo '	<tr>';
+		echo '		<th><label for="move_inventor" class="move_inventor_label">' . __( 'Inventor', 'text_domain' ) . '</label></th>';
+		echo '		<td>';
+		echo '			<input type="text" id="move_inventor" name="move_inventor" class="move_inventor_field" placeholder="' . esc_attr__( '', 'text_domain' ) . '" value="' . esc_attr__( $move_inventor ) . '">';
+		echo '		</td>';
+		echo '	</tr>';
+
+		echo '	<tr>';
+		echo '		<th><label for="move_jobs" class="move_jobs_label">' . __( 'Jobs Notation', 'text_domain' ) . '</label></th>';
+		echo '		<td>';
+		echo '			<input type="text" id="move_jobs" name="move_jobs" class="move_jobs_field" placeholder="' . esc_attr__( '', 'text_domain' ) . '" value="' . esc_attr__( $move_jobs ) . '">';
+		echo '		</td>';
+		echo '	</tr>';
+
+		echo '	<tr>';
+		echo '		<th><label for="move_relatedto" class="move_relatedto_label">' . __( 'Related To', 'text_domain' ) . '</label></th>';
+		echo '		<td>';
+		echo '			<input type="text" id="move_relatedto" name="move_relatedto" class="move_relatedto_field" placeholder="' . esc_attr__( '', 'text_domain' ) . '" value="' . esc_attr__( $move_relatedto ) . '">';
+		echo '		</td>';
+		echo '	</tr>';
+
+
+		echo '	<tr>';
+		echo '		<th><label for="move_supplementalvid" class="move_supplementalvid_label">' . __( 'Supplemental Videos', 'text_domain' ) . '</label></th>';
+		echo '		<td>';
+		echo '			<input type="text" id="move_supplementalvid" name="move_supplementalvid" class="move_supplementalvid_field" placeholder="' . esc_attr__( '', 'text_domain' ) . '" value="' . esc_attr__( $move_supplementalvid ) . '">';
+		echo '		</td>';
+		echo '	</tr>';
+
+		echo '	<tr>';
+		echo '		<th><label for="move_video" class="move_video_label">' . __( 'Video Demo', 'text_domain' ) . '</label></th>';
+		echo '		<td>';
+		echo '			<input type="text" id="move_video" name="move_video" class="move_video_field" placeholder="' . esc_attr__( '', 'text_domain' ) . '" value="' . esc_attr__( $move_video ) . '">';
+		echo '		</td>';
+		echo '	</tr>';
+
+		echo '</table>';
+	}
+
+	public function save_metabox( $post_id, $post ) {
+
+		// Add nonce for security and authentication.
+		$nonce_name   = $_POST['move_nonce'];
+		$nonce_action = 'move_nonce_action';
+
+		// Check if a nonce is set.
+		if ( ! isset( $nonce_name ) )
+			return;
+
+		// Check if a nonce is valid.
+		if ( ! wp_verify_nonce( $nonce_name, $nonce_action ) )
+			return;
+
+		// Check if the user has permissions to save data.
+		if ( ! current_user_can( 'edit_post', $post_id ) )
+			return;
+
+		// Check if it's not an autosave.
+		if ( wp_is_post_autosave( $post_id ) )
+			return;
+
+		// Check if it's not a revision.
+		if ( wp_is_post_revision( $post_id ) )
+			return;
+/*			$move_addbreakdown = get_post_meta( $post->ID, 'AddBreakDown', true );
+			$move_consecrecord = get_post_meta( $post->ID, 'Consecutive Record', true );
+			$move_inventor = get_post_meta( $post->ID, 'Inventor', true );
+			$move_jobs = get_post_meta( $post->ID, 'JobsNotation', true );
+			$move_relatedto = get_post_meta( $post->ID, 'RelatedTo', true );
+			$move_supplementalvid = get_post_meta( $post->ID, 'SupplementalVideos', true );
+			$move_video = get_post_meta( $post->ID, 'Video', true );
+*/		// Sanitize user input.
+		$move_addbreakdown = isset( $_POST[ 'move_addbreakdown' ] ) ? sanitize_text_field( $_POST[ 'move_addbreakdown' ] ) : '';
+		$move_consecrecord = isset( $_POST[ 'move_consecrecord' ] ) ? sanitize_text_field( $_POST[ 'move_consecrecord' ] ) : '';
+		$move_inventor = isset( $_POST[ 'move_inventor' ] ) ? sanitize_text_field( $_POST[ 'move_inventor' ] ) : '';
+		$move_jobs = isset( $_POST[ 'move_jobs' ] ) ? sanitize_text_field( $_POST[ 'move_jobs' ] ) : '';
+		$move_relatedto = isset( $_POST[ 'move_relatedto' ] ) ? sanitize_text_field( $_POST[ 'move_relatedto' ] ) : '';
+		$move_supplementalvid = isset( $_POST[ 'move_supplementalvid' ] ) ? sanitize_text_field( $_POST[ 'move_supplementalvid' ] ) : '';
+		$move_video = isset( $_POST[ 'move_video' ] ) ? sanitize_text_field( $_POST[ 'move_video' ] ) : '';
+
+
+		// Update the meta field in the database.
+		update_post_meta( $post_id, 'move_addbreakdown', $move_addbreakdown );
+		update_post_meta( $post_id, 'move_consecrecord', $move_consecrecord );
+		update_post_meta( $post_id, 'move_inventor', $move_inventor );
+		update_post_meta( $post_id, 'move_jobs', $move_jobs );
+		update_post_meta( $post_id, 'move_relatedto', $move_relatedto );
+		update_post_meta( $post_id, 'move_supplementalvid', $move_supplementalvid );
+		update_post_meta( $post_id, 'move_video', $move_video );
+
+	}
+
+}
+
+new Move_Info_Meta_Box;
+

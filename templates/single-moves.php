@@ -15,9 +15,11 @@
 	</div>
 
 	<div class="col-md-6">
-<form class="form">
-    <input class="form-control" type="text" placeholder="Search">
-  </form>
+<form role="search" method="get" id="searchform" action="<?php echo home_url( '/' ); ?>">
+<input type="hidden" name="post_type" value="moves" >
+<input type="text" name="s" id="s" class="">	
+<input type="submit" id="searchsubmit" value="Move Search" />
+</form>
 <hr>
 
 	</div>
@@ -54,13 +56,13 @@
 <?php $addcats = get_post_meta($post->ID, 'AddBreakDown', true); ?>
 <?php if($addcats): ?>
 <div class="addcats card-text">
-	<a href="/freestyle/additional-degrees-of-difficulty/"><?php echo $addcats ?></a>
+	<a href="/reference/freestyle/additional-degrees-of-difficulty/"><?php echo $addcats ?></a>
 </div>
 <?php endif; ?>
 <?php $jobs = get_post_meta($post->ID, 'JobsNotation', true); ?>
 <?php if($jobs): ?>
 <div class="jobsnotation card-text">
-	<a href="/freestyle/jobs-notation"><?php echo $jobs ?></a>
+	<a href="/reference/freestyle/jobs-notation"><?php echo $jobs ?></a>
 </div>
 <?php endif; ?>
 	</div>
