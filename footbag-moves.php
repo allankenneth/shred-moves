@@ -188,52 +188,43 @@ function adds() {
 }
 add_action( 'init', 'adds', 0 );
 
+add_action( 'load-post.php', 'moveinfo_post_meta_boxes_setup' );
+add_action( 'load-post-new.php', 'moveinfo_post_meta_boxes_setup' );
+/* Meta box setup function. */
+function moveinfo_post_meta_boxes_setup() {
 
+	/* Add meta boxes on the 'add_meta_boxes' hook. */
+	add_action( 'add_meta_boxes', 'moveinfo_add_post_meta_boxes' );
+	/* Save post meta on the 'save_post' hook. */
+	add_action( 'save_post', 'moveinfo_save_post_class_meta', 10, 2 );
+}
+/* Create one or more meta boxes to be displayed on the post editor screen. */
+function moveinfo_add_post_meta_boxes() {
 
-class Move_Info_Meta_Box {
+  add_meta_box(
+    'moveinfo',      // Unique ID
+    esc_html__( 'Move Info', 'moveinfo' ),    // Title
+    'moveinfo_post_class_meta_box',   // Callback function
+    'moves',         // Admin page (or post type)
+    'normal',         // Context
+    'default'         // Priority
+  );
+}
+/* Display the post meta box. */
+function moveinfo_post_class_meta_box( $object, $box ) { ?>
 
-	public function __construct() {
+  <?php wp_nonce_field( basename( __FILE__ ), 'moveinfo_post_class_nonce' ); ?>
 
-		if ( is_admin() ) {
-			add_action( 'load-post.php',     array( $this, 'init_metabox' ) );
-			add_action( 'load-post-new.php', array( $this, 'init_metabox' ) );
-		}
-
-	}
-
-	public function init_metabox() {
-
-		add_action( 'add_meta_boxes', array( $this, 'add_metabox'  )        );
-		add_action( 'save_post',      array( $this, 'save_metabox' ), 10, 2 );
-
-	}
-
-	public function add_metabox() {
-
-		add_meta_box(
-			'move_info',
-			__( 'Move Info', 'text_domain' ),
-			array( $this, 'render_metabox' ),
-			'Move',
-			'advanced',
-			'default'
-		);
-
-	}
-
-	public function render_metabox( $post ) {
-
-		// Add nonce for security and authentication.
-		wp_nonce_field( 'move_nonce_action', 'move_nonce' );
+<?php 
 
 		// Retrieve an existing value from the database.
-		$move_addbreakdown = get_post_meta( $post->ID, 'AddBreakDown', true );
-		$move_consecrecord = get_post_meta( $post->ID, 'Consecutive Record', true );
-		$move_inventor = get_post_meta( $post->ID, 'Inventor', true );
-		$move_jobs = get_post_meta( $post->ID, 'JobsNotation', true );
-		$move_relatedto = get_post_meta( $post->ID, 'RelatedTo', true );
-		$move_supplementalvid = get_post_meta( $post->ID, 'SupplementalVideos', true );
-		$move_video = get_post_meta( $post->ID, 'Video', true );
+		$move_addbreakdown = get_post_meta( $object->ID, 'AddBreakDown', true );
+		$move_consecrecord = get_post_meta( $object->ID, 'Consecutive Record', true );
+		$move_inventor = get_post_meta( $object->ID, 'Inventor', true );
+		$move_jobs = get_post_meta( $object->ID, 'JobsNotation', true );
+		$move_relatedto = get_post_meta( $object->ID, 'RelatedTo', true );
+		$move_supplementalvid = get_post_meta( $object->ID, 'SupplementalVideos', true );
+		$move_video = get_post_meta( $object->ID, 'Video', true );
 
 		// Set default values.
 		if( empty( $move_addbreakdown ) ) $move_addbreakdown = '';
@@ -297,62 +288,6 @@ class Move_Info_Meta_Box {
 		echo '	</tr>';
 
 		echo '</table>';
-	}
-
-	public function save_metabox( $post_id, $post ) {
-
-		// Add nonce for security and authentication.
-		$nonce_name   = $_POST['move_nonce'];
-		$nonce_action = 'move_nonce_action';
-
-		// Check if a nonce is set.
-		if ( ! isset( $nonce_name ) )
-			return;
-
-		// Check if a nonce is valid.
-		if ( ! wp_verify_nonce( $nonce_name, $nonce_action ) )
-			return;
-
-		// Check if the user has permissions to save data.
-		if ( ! current_user_can( 'edit_post', $post_id ) )
-			return;
-
-		// Check if it's not an autosave.
-		if ( wp_is_post_autosave( $post_id ) )
-			return;
-
-		// Check if it's not a revision.
-		if ( wp_is_post_revision( $post_id ) )
-			return;
-/*			$move_addbreakdown = get_post_meta( $post->ID, 'AddBreakDown', true );
-			$move_consecrecord = get_post_meta( $post->ID, 'Consecutive Record', true );
-			$move_inventor = get_post_meta( $post->ID, 'Inventor', true );
-			$move_jobs = get_post_meta( $post->ID, 'JobsNotation', true );
-			$move_relatedto = get_post_meta( $post->ID, 'RelatedTo', true );
-			$move_supplementalvid = get_post_meta( $post->ID, 'SupplementalVideos', true );
-			$move_video = get_post_meta( $post->ID, 'Video', true );
-*/		// Sanitize user input.
-		$move_addbreakdown = isset( $_POST[ 'move_addbreakdown' ] ) ? sanitize_text_field( $_POST[ 'move_addbreakdown' ] ) : '';
-		$move_consecrecord = isset( $_POST[ 'move_consecrecord' ] ) ? sanitize_text_field( $_POST[ 'move_consecrecord' ] ) : '';
-		$move_inventor = isset( $_POST[ 'move_inventor' ] ) ? sanitize_text_field( $_POST[ 'move_inventor' ] ) : '';
-		$move_jobs = isset( $_POST[ 'move_jobs' ] ) ? sanitize_text_field( $_POST[ 'move_jobs' ] ) : '';
-		$move_relatedto = isset( $_POST[ 'move_relatedto' ] ) ? sanitize_text_field( $_POST[ 'move_relatedto' ] ) : '';
-		$move_supplementalvid = isset( $_POST[ 'move_supplementalvid' ] ) ? sanitize_text_field( $_POST[ 'move_supplementalvid' ] ) : '';
-		$move_video = isset( $_POST[ 'move_video' ] ) ? sanitize_text_field( $_POST[ 'move_video' ] ) : '';
-
-
-		// Update the meta field in the database.
-		update_post_meta( $post_id, 'move_addbreakdown', $move_addbreakdown );
-		update_post_meta( $post_id, 'move_consecrecord', $move_consecrecord );
-		update_post_meta( $post_id, 'move_inventor', $move_inventor );
-		update_post_meta( $post_id, 'move_jobs', $move_jobs );
-		update_post_meta( $post_id, 'move_relatedto', $move_relatedto );
-		update_post_meta( $post_id, 'move_supplementalvid', $move_supplementalvid );
-		update_post_meta( $post_id, 'move_video', $move_video );
-
-	}
-
-}
-
-new Move_Info_Meta_Box;
+?>
+<?php }
 
